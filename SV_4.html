@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>💘</title>
+
+  <!-- Font elegante -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#f5f1ea;
+      --bg2:#e7dfd4;
+      --card: rgba(255,255,255,.76);
+
+      --red:#8b1d2c;
+      --red2:#b21f3b;
+
+      --text:#8b1d2c;
+      --muted: rgba(139,29,44,.62);
+
+      --border: rgba(0,0,0,.08);
+      --shadow: 0 18px 60px rgba(0,0,0,.12);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+      margin:0;
+      display:grid;
+      place-items:center;
+
+      /* tutto col font elegante */
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.55), transparent 45%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      color:var(--text);
+      overflow:hidden;
+    }
+
+    .card{
+      width:min(760px, 92vw);
+      background:var(--card);
+      backdrop-filter: blur(12px);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:28px 22px 22px;
+      text-align:center;
+    }
+
+    .icon{
+      width:54px;
+      height:54px;
+      margin:0 auto 10px;
+      display:grid;
+      place-items:center;
+      border-radius:18px;
+      background: rgba(255,255,255,.6);
+      position:relative;
+      font-size:28px;
+      font-style: normal; /* emoji più “pulita” */
+    }
+
+    .icon::after{
+      content:"";
+      position:absolute;
+      bottom:8px;
+      left:12px;
+      right:12px;
+      height:3px;
+      background: linear-gradient(90deg, transparent, var(--red), transparent);
+    }
+
+    h1{
+      margin:6px 0 4px;
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight:700;
+      transition: font-size .45s ease, margin .45s ease;
+    }
+    h1.shrink{
+      font-size: clamp(20px, 3vw, 30px);
+      margin-bottom:2px;
+    }
+
+    p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size: 18px;
+      font-weight:600;
+    }
+
+    .btns{
+      margin-top:26px;
+      height:140px;
+      position:relative;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:22px;
+    }
+
+    button{
+      border:0;
+      border-radius:999px;
+      padding:14px 28px;
+      font-size:18px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      transition: transform .12s ease;
+      -webkit-tap-highlight-color: transparent;
+
+      font-family: "Playfair Display", serif;
+      font-style: italic;
+    }
+    button:active{ transform: scale(.98); }
+
+    #yes{
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color:white;
+    }
+    #no{
+      background:white;
+      color:var(--red);
+      border:1px solid var(--border);
+      position:relative;
+    }
+
+    .result{
+      display:none;
+      margin-top:12px;
+    }
+
+    .line{
+      opacity:0;
+      transform: translateY(10px);
+      transition: opacity .75s ease, transform .75s ease;
+    }
+    .line.show{
+      opacity:1;
+      transform: translateY(0);
+    }
+
+    .line1{
+      font-size: clamp(28px, 3.8vw, 36px);
+      font-weight:700;
+      margin-top:10px;
+    }
+
+    .line2{
+      font-size: clamp(22px, 3.1vw, 30px);
+      font-weight:600;
+      margin-top:8px;
+    }
+
+    /* cuoricini minimal */
+    .heart{
+      position:fixed;
+      pointer-events:none;
+      opacity:.22;
+      animation: floatUp var(--dur) ease-out forwards;
+      color:var(--red);
+      font-style: normal; /* simboli più nitidi */
+    }
+    @keyframes floatUp{
+      from{transform:translateY(0) scale(var(--s)); opacity:0}
+      22%{opacity:.22}
+      to{transform:translateY(-160px) scale(calc(var(--s) + .18)); opacity:0}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="icon">💘</div>
+
+    <h1 id="title">Would you be my Valentine?</h1>
+    <p>Solo una semplice domanda… ma importantissima.</p>
+
+    <div class="btns" id="playground">
+      <button id="yes">Sì</button>
+      <button id="no">No</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="line line1" id="line1">Ottima scelta.</div>
+      <div class="line line2" id="line2">Alle 20:00 sono da te.</div>
+    </div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const playground = document.getElementById("playground");
+    const result = document.getElementById("result");
+    const title = document.getElementById("title");
+    const line1 = document.getElementById("line1");
+    const line2 = document.getElementById("line2");
+
+    let activated = false;
+    let placeholder;
+
+    function activateEscape(){
+      if (activated) return;
+      activated = true;
+
+      const rect = noBtn.getBoundingClientRect();
+      placeholder = document.createElement("span");
+      placeholder.style.display="inline-block";
+      placeholder.style.width = rect.width+"px";
+      placeholder.style.height = rect.height+"px";
+      playground.insertBefore(placeholder, noBtn);
+
+      const parent = playground.getBoundingClientRect();
+      playground.appendChild(noBtn);
+      noBtn.style.position="absolute";
+      noBtn.style.left=(rect.left-parent.left+rect.width/2)+"px";
+      noBtn.style.top =(rect.top-parent.top +rect.height/2)+"px";
+      noBtn.style.transform="translate(-50%,-50%)";
+    }
+
+    function moveNo(){
+      activateEscape();
+      const area = playground.getBoundingClientRect();
+      const bw=noBtn.offsetWidth, bh=noBtn.offsetHeight;
+      noBtn.style.left=(Math.random()*(area.width-bw)+bw/2)+"px";
+      noBtn.style.top =(Math.random()*(area.height-bh)+bh/2)+"px";
+    }
+
+    noBtn.addEventListener("mouseenter", moveNo);
+    noBtn.addEventListener("touchstart", e=>{e.preventDefault(); moveNo();}, {passive:false});
+    noBtn.addEventListener("focus", moveNo);
+
+    // pop discreto
+    let ctx;
+    function pop(){
+      ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+      const t=ctx.currentTime;
+      const o=ctx.createOscillator();
+      const g=ctx.createGain();
+      o.type="sine";
+      o.frequency.setValueAtTime(520,t);
+      o.frequency.exponentialRampToValueAtTime(260,t+.06);
+      g.gain.setValueAtTime(.001,t);
+      g.gain.exponentialRampToValueAtTime(.18,t+.015);
+      g.gain.exponentialRampToValueAtTime(.001,t+.12);
+      o.connect(g).connect(ctx.destination);
+      o.start(t); o.stop(t+.13);
+    }
+
+    function vibrate(){ navigator.vibrate?.([18,22,18]); }
+
+    function hearts(n=6){
+      const chars=["❤","♡","❥"];
+      for(let i=0;i<n;i++){
+        setTimeout(()=>{
+          const h=document.createElement("div");
+          h.className="heart";
+          h.textContent=chars[Math.floor(Math.random()*chars.length)];
+          h.style.left=18+Math.random()*64+"vw";
+          h.style.bottom="10vh";
+          h.style.fontSize=14+Math.random()*10+"px";
+          h.style.setProperty("--s",.9+Math.random()*.35);
+          h.style.setProperty("--dur",1400+Math.random()*800+"ms");
+          document.body.appendChild(h);
+          setTimeout(()=>h.remove(),2600);
+        },i*120);
+      }
+    }
+
+    yesBtn.addEventListener("click", ()=>{
+      pop(); vibrate(); hearts();
+      title.classList.add("shrink");
+      playground.style.display="none";
+      result.style.display="block";
+
+      requestAnimationFrame(()=>{
+        line1.classList.add("show");
+        setTimeout(()=>line2.classList.add("show"), 820);
+      });
+    });
+
+    window.addEventListener("pointerdown", ()=>ctx?.resume?.(), {once:true});
+  </script>
+</body>
+</html>
